@@ -1,0 +1,247 @@
+{% extends "app/base_site.html" %}
+
+{% block title %} Form Upload {% endblock title %}
+
+{% block stylesheets %}
+  {{ block.super }}
+  <!-- Dropzone.js -->
+  <link href="/static/vendors/dropzone/dist/min/dropzone.min.css" rel="stylesheet">
+{% endblock stylesheets %}
+
+{% block content %}
+  <div class="right_col" role="main">
+    <div class="">
+      <div class="page-title">
+        <div class="title_left">
+          <h1>Entrenamiento </h1>
+        </div>
+      </div>
+      <div class="clearfix"></div>
+      <!--<div class="row">-->
+        <!--<div class="col-md-12">-->
+          <!--<div class="x_panel">-->
+            <!--<div class="x_title">-->
+              <!--<h2>Instrucciones</h2>-->
+              <!--<ul class="nav navbar-right panel_toolbox" style="min-width: initial;">-->
+                <!--<li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
+                <!--</li>-->
+                <!--<li><a class="close-link"><i class="fa fa-close"></i></a>-->
+                <!--</li>-->
+              <!--</ul>-->
+              <!--<div class="clearfix"></div>-->
+            <!--</div>-->
+
+            <!--<div class="x_content">-->
+              <!--<div class="col-md-12 col-lg-12 col-sm-12">-->
+                <!--<blockquote>-->
+                  <!--<p align="justify">-->
+                    <!--Esta vista permite entrenar el modelo usado para clasificar los tweets.-->
+                    <!--Es necesario cargar el set de datos mediante una archivo con extensión ".csv", cuyo-->
+                    <!--interior contenga dos columnas una llamada "text" con el contenido de los tweets y otra llamada-->
+                    <!--"label" con su correspondiente categorías.-->
+                  <!--</p>-->
+                <!--</blockquote>-->
+              <!--</div>-->
+            <!--</div>-->
+          <!--</div>-->
+        <!--</div>-->
+      <!--</div>-->
+
+      <div class="clearfix"></div>
+
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>Cargar datos de entrenamiento</h2>
+              <ul class="nav navbar-right panel_toolbox" style="min-width: initial;">
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                </li>
+                <li><a class="close-link"><i class="fa fa-close"></i></a>
+                </li>
+              </ul>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+              <p>
+                Suelte aquí el archivo .csv que contiene el set de entrenamientos del modelo,
+                recuerde que este archivo debe contener solo dos columnas, una llamada "label" con la
+                categoría del tweet (siata, nosiata) y la otra llamada "text" con el contenido del tweet.
+              </p>
+              <form action="{% url 'ajax_guardarArchivo' %}" class="dropzone"></form>
+            </div>
+            <button id="iniciarEntrenamiento" type="button" class="btn btn-dark pull-right">Iniciar entrenamiento</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div id = "resultadosEntrenamiento" style="display: none">
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+          <div class="dashboard_graph">
+            <div class="row">
+              <div class="col-md-6">
+                <h3>Resultados</h3>
+                A continuación se muestran los resultados obtenidos al evaluar el modelo entrenado
+              </div>
+              <div class="col-md-6"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row tile_count">
+        <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+          <span class="count_top"><i class="fa fa-times"></i> Falsos positivos</span>
+          <div id = "fp" class="count">0</div>
+          <!--<span class="count_bottom"><i class="green">4% </i> From last Week</span>-->
+        </div>
+        <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+          <span class="count_top"><i class="fa fa-times"></i> Falsos negativos</span>
+          <div id = "fn" class="count">0</div>
+          <!--<span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>3% </i> From last Week</span>-->
+        </div>
+        <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+          <span class="count_top"><i class="fa fa-check-square-o"></i> Verdaderos positivos</span>
+          <div id = "tp" class="count">0</div>
+          <!--<span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>-->
+        </div>
+        <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+          <span class="count_top"><i class="fa fa-check-square-o"></i> Verdaderos negativos</span>
+          <div id ="tn" class="count">0</div>
+          <!--<span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>12% </i> From last Week</span>-->
+        </div>
+        <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+          <span class="count_top"><i class="fa fa-dashboard"></i> Accuracy score</span>
+          <div id = "accuracy" class="count green">0</div>
+          <!--<span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>-->
+        </div>
+        <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+          <span class="count_top"><i class="fa fa-clock-o"></i> Tiempo de ejecución (Seg)</span>
+          <div id = "tiempoEjecucion" class="count">0</div>
+          <!--<span style="padding-left: 4px;" count_bottom">Segundos</span>-->
+        </div>
+      </div>
+
+
+      <div class="clearfix"></div>
+
+      <div class="row">
+        <div class="col-md-7 col-sm-7 col-xs-12">
+            <div class="x_panel">
+              <div class="x_title">
+                <h2>Classification Report</h2>
+                <ul class="nav navbar-right panel_toolbox" style="min-width: initial">
+                  <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                  </li>
+                  <li><a class="close-link"><i class="fa fa-close"></i></a>
+                  </li>
+                </ul>
+                <div class="clearfix"></div>
+              </div>
+              <div class="x_content">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>precision</th>
+                      <th >recall</th>
+                      <th>f1-score</th>
+                      <th>support</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row">siata</th>
+                      <td id="precisionSiata">-</td>
+                      <td id="recallSiata">-</td>
+                      <td id="f1-scoreSiata">-</td>
+                      <td id="supportSiata">-</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">nosiata</th>
+                      <td id="precisionNoSiata">-</td>
+                      <td id="recallNoSiata" >-</td>
+                      <td id="f1-scoreNoSiata" >-</td>
+                      <td id="supportNoSiata" >-</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">avg / total</th>
+                      <td id="avgTotalPrecision">-</td>
+                      <td id="avgTotalRecall">-</td>
+                      <td id="avgTotalf1-score">-</td>
+                      <td id="avgTotalSupport">-</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        <div class="col-md-5 col-sm-5 col-xs-12">
+          <div class="x_panel tile overflow_hidden">
+            <div class="x_title">
+              <h2>Distribución del conjunto de entrenamiento</h2>
+              <ul class="nav navbar-right panel_toolbox" style="min-width: initial">
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                </li>
+                <li><a class="close-link"><i class="fa fa-close"></i></a>
+                </li>
+              </ul>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+              <table class="" style="width:100%">
+                <tr>
+                  <th style="width:50%;">
+                  </th>
+                  <th>
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                      <p>categoria</p>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                      <p>porcentaje</p>
+                    </div>
+                  </th>
+                </tr>
+                <tr>
+                  <td>
+                    <canvas class="canvasDoughnut" height="140" width="140" style="margin: 10px 10px 10px 20px"></canvas>
+                  </td>
+                  <td>
+                    <table class="tile_info" style="width:70% !important; margin-left: 10px;">
+                      <tr>
+                        <td>
+                          <p><i class="fa fa-square red"></i>siata </p>
+                        </td>
+                        <td id="porcentajeSiata">0%</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <p><i class="fa fa-square green"></i>nosiata</p>
+                        </td>
+                        <td id="porcentajeNoSiata">0%</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+
+{% block javascripts %}
+  {{ block.super }}
+  <script>
+      var urlAjaxEntrenamiento = {% url 'ajax_correrEntrenamiento' %};
+  </script>
+  <!-- Dropzone.js -->
+  <script src="/static/vendors/dropzone/dist/dropzone.js"></script>
+  <script src="/static/vendors/Chart.js/dist/Chart.min.js"></script>
+{% endblock javascripts %}
